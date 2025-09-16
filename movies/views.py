@@ -7,6 +7,8 @@ def index(request):
         movies = Movie.objects.filter(name__icontains=search_term)
     else:
         movies = Movie.objects.all()
+    if request.user.is_authenticated:
+        movies = movies.exclude(hidden_by=request.user)
     template_data = {}
     template_data['title'] = 'Movies'
     template_data['movies'] = movies
@@ -59,3 +61,23 @@ def delete_review(request, id, review_id):
         user=request.user)
     review.delete()
     return redirect('movies.show', id=id)
+
+@login_required
+def hide_movie(request, id):
+    movie = get_object_or_404(Movie, id=id)
+    movie.hidden_by.add(request.user)
+    return redirect('movies.index')
+
+@login_required
+def unhide_movie(request, id):
+    movie = get_object_or_404(Movie, id=id)
+    movie.hidden_by.remove(request.user)
+    return redirect('movies.hidden')
+
+@login_required
+def hidden(request):
+    movies = request.user.hidden_movies.all()
+    template_data = {}
+    template_data['title'] = 'Hidden Movies'
+    template_data['movies'] = movies
+    return render(request, 'movies/hidden.html', {'template_data': template_data})

@@ -25,6 +25,9 @@
             </div>
           </form>
         </p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'movies.hidden' %}" class="btn btn-outline-secondary mb-2">View Hidden Movies</a>
+        {% endif %}
       </div>
     </div>
     <div class="row">
@@ -37,7 +40,13 @@
             <a href="{% url 'movies.show' id=movie.id %}"
               class="btn bg-dark text-white">
             {{ movie.name }}
-            </a>    
+            </a>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'movies.hide' id=movie.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger mt-2">Hide</button>
+            </form>
+            {% endif %}
           </div>
         </div>
       </div>

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-3">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col-md-8 mx-auto">
+        <h2>{{ template_data.petition.movie_title }}</h2>
+        <hr />
+        
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+        
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5>Petition Details</h5>
+          </div>
+          <div class="card-body">
+            <p><strong>Movie:</strong> {{ template_data.petition.movie_title }}</p>
+            <p><strong>Description:</strong></p>
+            <p>{{ template_data.petition.description }}</p>
+            <p><strong>Requested by:</strong> {{ template_data.petition.created_by.username }}</p>
+            <p><strong>Date:</strong> {{ template_data.petition.created_at|date:"F d, Y \a\t g:i A" }}</p>
+            
+            {% if user.is_authenticated and user == template_data.petition.created_by %}
+            <div class="mt-3">
+              <a href="{% url 'petitions.delete' id=template_data.petition.id %}" class="btn btn-outline-danger btn-sm">
+                🗑️ Delete My Petition
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Voting Results -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5>Voting Results</h5>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-6">
+                <h3 class="text-success">{{ template_data.yes_votes }}</h3>
+                <p>👍 Yes Votes</p>
+              </div>
+              <div class="col-md-6">
+                <h3 class="text-danger">{{ template_data.no_votes }}</h3>
+                <p>👎 No Votes</p>
+              </div>
+            </div>
+            
+            {% if template_data.yes_votes > 0 or template_data.no_votes > 0 %}
+            <div class="progress mt-3">
+              {% widthratio template_data.yes_votes template_data.yes_votes|add:template_data.no_votes 100 as yes_percentage %}
+              {% widthratio template_data.no_votes template_data.yes_votes|add:template_data.no_votes 100 as no_percentage %}
+              <div class="progress-bar bg-success" role="progressbar" style="width: {{ yes_percentage }}%" aria-valuenow="{{ yes_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                {{ yes_percentage }}%
+              </div>
+              <div class="progress-bar bg-danger" role="progressbar" style="width: {{ no_percentage }}%" aria-valuenow="{{ no_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                {{ no_percentage }}%
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Voting Section -->
+        {% if user.is_authenticated %}
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5>Cast Your Vote</h5>
+          </div>
+          <div class="card-body">
+            {% if template_data.has_voted %}
+              <p>You have already voted: <strong>{{ template_data.user_vote.vote_type|upper }}</strong></p>
+              <p>You can change your vote by selecting a different option below:</p>
+            {% else %}
+              <p>Do you want this movie to be added to the catalog?</p>
+            {% endif %}
+            
+            <form method="POST" action="{% url 'petitions.vote' id=template_data.petition.id %}">
+              {% csrf_token %}
+              <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <button type="submit" name="vote_type" value="yes" class="btn btn-success me-md-2">
+                  👍 Yes, add this movie!
+                </button>
+                <button type="submit" name="vote_type" value="no" class="btn btn-danger">
+                  👎 No, don't add this movie
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <div class="card mb-4">
+          <div class="card-body text-center">
+            <p>Please <a href="{% url 'accounts.login' %}">login</a> to vote on this petition.</p>
+          </div>
+        </div>
+        {% endif %}
+        
+        <div class="text-center">
+          <a href="{% url 'petitions.index' %}" class="btn btn-outline-secondary">Back to All Petitions</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

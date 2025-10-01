@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-3 mt-4">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow p-3 mb-4 rounded">
+          <div class="card-body">
+            <h2 class="text-danger">Delete Petition</h2>
+            <hr />
+            
+            <div class="alert alert-warning" role="alert">
+              <strong>⚠️ Warning:</strong> You are about to permanently delete this petition. This action cannot be undone.
+            </div>
+            
+            <div class="card mb-3">
+              <div class="card-header">
+                <h5>Petition Details</h5>
+              </div>
+              <div class="card-body">
+                <p><strong>Movie:</strong> {{ template_data.petition.movie_title }}</p>
+                <p><strong>Description:</strong></p>
+                <p>{{ template_data.petition.description }}</p>
+                <p><strong>Created:</strong> {{ template_data.petition.created_at|date:"F d, Y \a\t g:i A" }}</p>
+                <p><strong>Current Votes:</strong> 
+                  <span class="badge bg-success">{{ template_data.petition.get_yes_votes }} Yes</span>
+                  <span class="badge bg-danger">{{ template_data.petition.get_no_votes }} No</span>
+                </p>
+              </div>
+            </div>
+            
+            <div class="text-center">
+              <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger me-2">
+                  🗑️ Yes, Delete Petition
+                </button>
+              </form>
+              <a href="{% url 'petitions.show' id=template_data.petition.id %}" class="btn btn-secondary">
+                Cancel
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
